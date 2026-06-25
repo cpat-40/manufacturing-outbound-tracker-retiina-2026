@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="theme-color" content="#1a1a2e">
+<meta name="referrer" content="no-referrer">
 <title>Retiina · Outbound Tracker</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -628,7 +629,7 @@ function renderTable(rows){
       : '—';
     const slipCell = s.packingSlip
       ? (isUrl(s.packingSlip)
-          ?`<a href="${esc(s.packingSlip)}" target="_blank" class="link-btn">📄 Slip</a>`
+          ?`<a href="${esc(s.packingSlip)}" target="_blank" referrerpolicy="no-referrer" class="link-btn">📄 Slip</a>`
           :`<span style="font-size:.75rem;color:#777" title="${esc(s.packingSlip)}">📄 ${esc(s.packingSlip.length>20?s.packingSlip.slice(-20):s.packingSlip)}</span>`)
       : '—';
     const photos = (s.photos||[]).filter(p=>p&&p!=='No Picture available'&&p!=='No Picture Available');
@@ -636,7 +637,7 @@ function renderTable(rows){
       ?photos.map((p,i)=>{
           const ext = /\.(jpe?g|png|gif|webp|svg)(\?.*)?$/i.test(p);
           return isUrl(p)
-            ?`<a href="${esc(p)}" target="_blank" class="link-btn" onclick="${ext?`openLbox(event,'${esc(p)}')`:''}">📷${i+1}</a>`
+            ?`<a href="${esc(p)}" target="_blank" referrerpolicy="no-referrer" class="link-btn" onclick="${ext?`openLbox(event,'${esc(p)}')`:''}">📷${i+1}</a>`
             :`<span class="link-btn" style="cursor:default;color:#bbb">📷${i+1}</span>`;
         }).join(' ')
       :'<span style="color:#ddd;font-size:.75rem">—</span>';
@@ -686,7 +687,7 @@ function renderCards(rows){
       <div class="m-foot">
         <span class="m-cost">${s.cost?'$'+parseFloat(s.cost).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):''}</span>
         <div style="display:flex;align-items:center;gap:7px">
-          ${s.packingSlip&&isUrl(s.packingSlip)?`<a href="${esc(s.packingSlip)}" target="_blank" class="link-btn">📄</a>`:''}
+          ${s.packingSlip&&isUrl(s.packingSlip)?`<a href="${esc(s.packingSlip)}" target="_blank" referrerpolicy="no-referrer" class="link-btn">📄</a>`:''}
           ${hw?`<button class="btn btn-xs btn-secondary" onclick="openEdit('${s.id}')">Edit</button>
                 <button class="btn btn-xs btn-danger" onclick="askDel('${s.id}')">✕</button>`:''}
         </div>
