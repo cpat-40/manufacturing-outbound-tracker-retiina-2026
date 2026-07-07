@@ -349,6 +349,11 @@ tr:hover td{background:#fafbff}
       <span class="hint">Google Sheet → Extensions → Apps Script → Deploy → Web App URL</span>
     </div>
     <div class="sfg">
+      <label>Read Key</label>
+      <input type="text" id="cfgReadKey" placeholder="Team view password">
+      <span class="hint">Required to load data (protects shipment data from public access)</span>
+    </div>
+    <div class="sfg">
       <label>Write Key <small style="font-weight:400;text-transform:none">(leave blank for view-only)</small></label>
       <input type="text" id="cfgKey" placeholder="Your team's password">
     </div>
@@ -439,7 +444,7 @@ function saveLocal(){
 async function apiFetch(){
   if(!cfg.apiUrl) return null;
   try{
-    const r = await fetch(cfg.apiUrl+'?t='+Date.now());
+    const r = await fetch(cfg.apiUrl+'?t='+Date.now()+((cfg.readKey||cfg.writeKey)?'&key='+encodeURIComponent(cfg.readKey||cfg.writeKey):''));
     const j = await r.json();
     if(!j.success) throw new Error(j.error);
     return j.data || [];
@@ -1059,14 +1064,16 @@ function closeLbox(){document.getElementById('lbox').classList.remove('open');}
 // ── Settings ──────────────────────────────────────────────────────────────────
 function openSettings(){
   document.getElementById('cfgUrl').value=cfg.apiUrl||'';
+  document.getElementById('cfgReadKey').value=cfg.readKey||'';
   document.getElementById('cfgKey').value=cfg.writeKey||'';
   document.getElementById('settingsOverlay').classList.add('open');
 }
 function closeSettings(){document.getElementById('settingsOverlay').classList.remove('open');}
 function saveConfig(){
   const u=document.getElementById('cfgUrl').value.trim();
+  const rk=document.getElementById('cfgReadKey').value.trim();
   const k=document.getElementById('cfgKey').value.trim();
-  cfg={apiUrl:u,writeKey:k};
+  cfg={apiUrl:u,readKey:rk,writeKey:k};
   localStorage.setItem(CFG_KEY,JSON.stringify(cfg));
   updMode();
   document.getElementById('connBanner').classList.toggle('show',!u);
@@ -1098,8 +1105,9 @@ async function doBulkImport(){
 
 // ── Export CSV ────────────────────────────────────────────────────────────────
 function exportCSV(){
-  const headers=['Index','Ship Date','Program','Carrier','Tracking Number','Packing Slip','Shipping Photos','Delivered?','S/O Number','Shipping PO','Cost','Weight','Notes'];
-  const rows=ships.map(s=>[s.index,s.shipDate,s.program,s.carrier,s.tracking,s.packingSlip,(s.photos||[]).join(' | '),s.delivered,s.so,s.po,s.cost,s.weight,s.notes].map(v=>`"${String(v||'').replace(/"/g,'""')}"`));
+  const src = getFiltered();          // exports the current filtered view; clear filters to export everything
+  const headers=['Index','Ship Date','Program','Carrier','Tracking Number','Packing Slip','Shipping Photos','Delivered?','S/O Number','Shipping PO','Kit Number','Part Number','Cost','Weight','Notes'];
+  const rows=src.map(s=>[s.index,s.shipDate,s.program,s.carrier,s.tracking,s.packingSlip,(s.photos||[]).join(' | '),s.delivered,s.so,s.po,s.kitNo,s.partNo,s.cost,s.weight,s.notes].map(v=>`"${String(v||'').replace(/"/g,'""')}"`));
   const csv=[headers.join(','),...rows.map(r=>r.join(','))].join('\r\n');
   const a=document.createElement('a');
   a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
