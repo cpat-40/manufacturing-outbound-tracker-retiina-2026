@@ -23,6 +23,40 @@ header{background:#1a1a2e;color:#fff;padding:0 24px;height:56px;display:flex;ali
 .mode-pill{font-size:.68rem;padding:3px 9px;border-radius:20px;font-weight:700;background:rgba(255,255,255,.14);color:rgba(255,255,255,.85)}
 .mode-pill.write{background:rgba(74,222,128,.25);color:#86efac}
 
+/* ── TABBAR ─────────────────────────────────────────────────── */
+.tabbar{position:sticky;top:56px;z-index:45;background:#fff;border-bottom:1px solid #e7e9f0;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.tabbar-in{max-width:1400px;margin:0 auto;display:flex;padding:0 24px;gap:4px}
+.tab{padding:13px 20px 11px;font-weight:800;font-size:.92rem;border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;font-family:inherit;display:flex;align-items:center;gap:7px;transition:color .15s,border-color .15s,background .15s}
+#tab-ship{color:#4f6ef7}
+#tab-kit{color:#16a34a}
+#tab-inv{color:#7c3aed}
+.tab:hover{background:#f5f7ff}
+#tab-ship.active{border-bottom-color:#4f6ef7;background:#eef1fe}
+#tab-kit.active{border-bottom-color:#16a34a;background:#e9f9ef}
+#tab-inv.active{border-bottom-color:#7c3aed;background:#f3eefe}
+.tab:not(.active){opacity:.62}
+.tab:hover{opacity:1}
+@media(max-width:768px){
+  .tabbar{top:52px}
+  .tabbar-in{padding:0}
+  .tab{flex:1;justify-content:center;padding:11px 4px 9px;font-size:.78rem;gap:4px}
+}
+.tool-panel{background:#1e1e2e;border-radius:14px;padding:24px;color:#fff}
+#tab-prog{color:#d97706}
+#tab-prog.active{border-bottom-color:#d97706;background:#fdf3e7}
+.stat-card.clickable{cursor:pointer;transition:transform .12s,box-shadow .15s}
+.stat-card.clickable:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(79,110,247,.18)}
+.copy-btn{background:#eef0fd;border:none;color:#4f6ef7;border-radius:5px;padding:2px 6px;font-size:.72rem;cursor:pointer;margin-left:4px;vertical-align:middle}
+.copy-btn:hover{background:#dde1fb}
+.prog-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.prog-card{background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.07);cursor:pointer;transition:transform .12s,box-shadow .15s}
+.prog-card:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(79,110,247,.16)}
+.dt-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 18px}
+.dt-l{font-size:.68rem;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
+.dt-v{font-size:.88rem}
+@media(max-width:768px){.dt-grid{grid-template-columns:1fr}}
+@media(max-width:768px){.tool-panel{padding:16px 14px;border-radius:12px}}
+
 /* ── CONTAINER ──────────────────────────────────────────────── */
 .container{max-width:1400px;margin:0 auto;padding:20px}
 
@@ -208,15 +242,23 @@ tr:hover td{background:#fafbff}
   </div>
 </header>
 
+<nav class="tabbar"><div class="tabbar-in">
+  <button class="tab active" id="tab-ship" onclick="switchTab('ship')">📦 Shipments</button>
+  <button class="tab" id="tab-kit" onclick="switchTab('kit')">🔧 Kit Lookup</button>
+  <button class="tab" id="tab-inv" onclick="switchTab('inv')">📋 Inventory</button>
+  <button class="tab" id="tab-prog" onclick="switchTab('prog')">🏭 Programs</button>
+</div></nav>
+
 <div class="container">
 
+<div id="viewShip">
   <!-- Stats -->
   <div class="stats">
-    <div class="stat-card"><div class="stat-val" id="stTotal">0</div><div class="stat-lbl">Total</div></div>
-    <div class="stat-card"><div class="stat-val" id="stDelivered">0</div><div class="stat-lbl">Delivered</div></div>
-    <div class="stat-card"><div class="stat-val" id="stTransit">0</div><div class="stat-lbl">In Transit</div></div>
-    <div class="stat-card"><div class="stat-val" id="stMonth">0</div><div class="stat-lbl">This Month</div></div>
-    <div class="stat-card"><div class="stat-val" id="stPrograms">0</div><div class="stat-lbl">Programs</div></div>
+    <div class="stat-card clickable" onclick="statClick('total')" title="Show all shipments"><div class="stat-val" id="stTotal">0</div><div class="stat-lbl">Total</div></div>
+    <div class="stat-card clickable" onclick="statClick('del')" title="Filter: delivered"><div class="stat-val" id="stDelivered">0</div><div class="stat-lbl">Delivered</div></div>
+    <div class="stat-card clickable" onclick="statClick('transit')" title="Filter: in transit"><div class="stat-val" id="stTransit">0</div><div class="stat-lbl">In Transit</div></div>
+    <div class="stat-card clickable" onclick="statClick('month')" title="Filter: this month"><div class="stat-val" id="stMonth">0</div><div class="stat-lbl">This Month</div></div>
+    <div class="stat-card clickable" onclick="statClick('prog')" title="Open Programs view"><div class="stat-val" id="stPrograms">0</div><div class="stat-lbl">Programs</div></div>
     <div class="stat-card"><div class="stat-val" id="stCost">$0</div><div class="stat-lbl">Freight Cost</div></div>
   </div>
 
@@ -228,8 +270,6 @@ tr:hover td{background:#fafbff}
         <input type="text" id="searchInput" placeholder="Search program, carrier, kit #, part #, PO, S/O…" oninput="render()">
       </div>
       <button class="btn btn-secondary" onclick="exportCSV()">⬇ CSV</button>
-      <button class="btn btn-secondary" onclick="openKitLookup()" style="background:#22c55e;color:#fff">🔧 Kit Lookup</button>
-      <button class="btn btn-secondary" onclick="openInvLookup()" style="background:#8b5cf6;color:#fff">📋 Inventory</button>
     </div>
     <div class="toolbar-row">
       <div class="date-grp">
@@ -287,6 +327,49 @@ tr:hover td{background:#fafbff}
 
   <!-- Mobile Cards -->
   <div id="cardsWrap"></div>
+</div><!-- /viewShip -->
+
+<div id="viewKit" style="display:none">
+  <div class="tool-panel">
+    <h2 style="margin:0 0 16px;font-size:1.05rem">🔧 Kit Lookup — Which shipment did this kit go on?</h2>
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <input id="kitSearchInput" type="text" placeholder="Type kit # or part # (e.g. 1003-20733, HSIU-1257, R-001360…)"
+        style="flex:1;padding:10px 14px;border-radius:8px;border:none;background:#2a2a3e;color:#fff;font-size:.9rem;outline:none"
+        oninput="kitSearch()" autocomplete="off">
+      <button onclick="document.getElementById('kitSearchInput').value='';kitSearch()" style="padding:8px 14px;border-radius:8px;border:none;background:#444;color:#fff;cursor:pointer">Clear</button>
+    </div>
+    <div id="kitResultCount" style="font-size:.8rem;color:#888;margin-bottom:8px"></div>
+    <div id="kitResults" style="min-height:200px">
+      <div style="color:#888;text-align:center;margin:40px 0">Start typing a kit number above</div>
+    </div>
+  </div>
+</div><!-- /viewKit -->
+
+<div id="viewInv" style="display:none">
+  <div class="tool-panel">
+    <h2 style="margin:0 0 4px;font-size:1.05rem">📋 Inventory Locator — Where is it &amp; is it available?</h2>
+    <div style="font-size:.72rem;color:#a78bfa;font-weight:700;margin-bottom:14px">Inventory as of <span id="invAsof"></span> · snapshot, not live</div>
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <input id="invSearchInput" type="text" placeholder="Type part # or description (e.g. R-001360, camera, 1003-20280…)"
+        style="flex:1;padding:10px 14px;border-radius:8px;border:none;background:#2a2a3e;color:#fff;font-size:.9rem;outline:none"
+        oninput="invSearch()" autocomplete="off">
+      <button onclick="document.getElementById('invSearchInput').value='';invSearch()" style="padding:8px 14px;border-radius:8px;border:none;background:#444;color:#fff;cursor:pointer">Clear</button>
+    </div>
+    <div style="display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+      <select id="invWh" onchange="invSearch()" style="padding:8px 10px;border-radius:8px;border:none;background:#2a2a3e;color:#fff;font-size:.82rem;outline:none;max-width:280px"></select>
+      <label style="display:flex;align-items:center;gap:6px;font-size:.82rem;color:#ccc;cursor:pointer;user-select:none"><input type="checkbox" id="invAvail" onchange="invSearch()" style="accent-color:#8b5cf6;width:15px;height:15px"> In-stock only (Available &gt; 0)</label>
+    </div>
+    <div id="invResultCount" style="font-size:.8rem;color:#888;margin-bottom:8px"></div>
+    <div id="invResults" style="min-height:200px">
+      <div style="color:#888;text-align:center;margin:40px 0">Start typing a part number above</div>
+    </div>
+  </div>
+</div><!-- /viewInv -->
+
+<div id="viewProg" style="display:none">
+  <div style="margin-bottom:14px;color:#777;font-size:.85rem">Click a program to see its shipments. Counts reflect all data currently loaded.</div>
+  <div id="progGrid" class="prog-grid"></div>
+</div><!-- /viewProg -->
 
 </div><!-- /container -->
 
@@ -394,6 +477,10 @@ tr:hover td{background:#fafbff}
 </div>
 
 <!-- Lightbox -->
+<div class="overlay" id="detailOverlay" onclick="overlayClick(event,'detailOverlay',closeDetail)">
+  <div class="modal" id="detailBody" style="max-width:560px"></div>
+</div>
+
 <div class="lbox" id="lbox" onclick="closeLbox()">
   <img id="lboxImg" src="" alt="">
   <button class="lbox-close" onclick="closeLbox()">✕</button>
@@ -505,11 +592,29 @@ async function doRefresh(){
 
 
   // ── KIT LOOKUP ─────────────────────────────────────────────────────────────
-  function openKitLookup(){
-    document.getElementById('kitOverlay').style.display='flex';
-    setTimeout(()=>document.getElementById('kitSearchInput').focus(),100);
+  function switchTab(t){
+    const views={ship:'viewShip',kit:'viewKit',inv:'viewInv',prog:'viewProg'};
+    for(const k in views){
+      document.getElementById(views[k]).style.display = (k===t)?'':'none';
+      document.getElementById('tab-'+k).classList.toggle('active', k===t);
+    }
+    const fab=document.querySelector('.mob-fab');
+    if(fab) fab.style.display = (t==='ship') ? '' : 'none';
+    if(t==='inv'){
+      document.getElementById('invAsof').textContent=INV_ASOF;
+      const w=document.getElementById('invWh');
+      if(w && !w.options.length){
+        const names=Object.entries(INV_WH).sort((a,b)=>a[1].localeCompare(b[1]));
+        w.innerHTML='<option value="">All Warehouses ('+names.length+')</option>'+names.map(([c,n])=>`<option value="${c}">${esc(n)} (#${c})</option>`).join('');
+      }
+    }
+    if(t==='prog'){ renderPrograms(); }
+    if(t==='kit') setTimeout(()=>document.getElementById('kitSearchInput').focus(),80);
+    if(t==='inv') setTimeout(()=>document.getElementById('invSearchInput').focus(),80);
+    window.scrollTo({top:0});
   }
-  function closeKitLookup(){ document.getElementById('kitOverlay').style.display='none'; }
+  function openKitLookup(){ switchTab('kit'); }
+  function closeKitLookup(){ switchTab('ship'); }
 
   // Panel data store — avoids JSON.stringify in onclick attributes
   const _panelStore = {};
@@ -632,7 +737,10 @@ async function doRefresh(){
             <div style="font-size:1.05rem;font-weight:800;color:${hasMatch?'#81c784':'#ffa726'};letter-spacing:.4px">${esc(kit)}</div>
             <div style="font-size:.83rem;color:#bbb;margin-top:3px">${esc(desc)}${qty?` · <span style="color:#777">Qty ${esc(qty)}</span>`:''}</div>
           </div>
-          <div style="font-size:.72rem;color:#555;white-space:nowrap">Week: ${esc(week)}</div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:7px">
+            <button data-k="${esc(kit)}" onclick="stockCheck(this.dataset.k)" style="background:#2d2450;border:1px solid #4c3d78;color:#c4b5fd;padding:4px 11px;border-radius:7px;font-size:.74rem;font-weight:700;cursor:pointer;white-space:nowrap">📋 Check stock</button>
+            <div style="font-size:.72rem;color:#555;white-space:nowrap">Week: ${esc(week)}</div>
+          </div>
         </div>
         ${shipsHtml}
       </div>`;
@@ -811,12 +919,13 @@ function renderTable(rows){
         }).join(' ')
       :'<span style="color:#ddd;font-size:.75rem">—</span>';
     const hw = !!(cfg.apiUrl && cfg.writeKey);
-    return `<tr>
+    const trackFull = s.tracking ? trackCell+` <button class="copy-btn" data-t="${esc(s.tracking)}" onclick="copyTrack(this.dataset.t,event)" title="Copy tracking #">⧉</button>` : trackCell;
+    return `<tr onclick="openDetail('${s.id}',event)" style="cursor:pointer" title="Click for details">
       <td class="mono">${esc(s.index)||'—'}</td>
       <td style="white-space:nowrap">${fmt(s.shipDate)}</td>
       <td><strong>${esc(s.program)}</strong></td>
       <td>${carrierBadge(s.carrier)}</td>
-      <td>${trackCell}</td>
+      <td style="white-space:nowrap">${trackFull}</td>
       <td>${slipCell}</td>
       <td>${photoCell}</td>
       <td>${delivBadge(s.delivered)}</td>
@@ -843,7 +952,7 @@ function renderCards(rows){
   }
   wrap.innerHTML = rows.map(s=>{
     const photos = (s.photos||[]).filter(p=>p&&p!=='No Picture available'&&p!=='No Picture Available');
-    return `<div class="m-card">
+    return `<div class="m-card" onclick="openDetail('${s.id}',event)">
       <div class="m-card-top">
         <div class="m-prog">${esc(s.program)}</div>
         <div class="m-idx">#${esc(s.index)||'—'}</div>
@@ -853,7 +962,7 @@ function renderCards(rows){
         ${delivBadge(s.delivered)}
         <span class="badge bg-other">${fmt(s.shipDate)}</span>
       </div>
-      ${s.tracking?`<div class="m-track">${esc(s.tracking)}</div>`:''}
+      ${s.tracking?`<div class="m-track">${esc(s.tracking)} <button class="copy-btn" data-t="${esc(s.tracking)}" onclick="copyTrack(this.dataset.t,event)">⧉</button></div>`:''}
       ${(s.kitNo||s.partNo)?`<div style="font-size:.75rem;color:#888;margin-bottom:4px">${s.kitNo?`<span style="margin-right:8px">🔧 Kit: <strong>${esc(s.kitNo)}</strong></span>`:''}${s.partNo?`<span>Part: <strong>${esc(s.partNo)}</strong></span>`:''}</div>`:''}
       ${photos.length>0?`<div style="display:flex;gap:5px;overflow-x:auto;margin-bottom:6px">${photos.slice(0,4).map(p=>isUrl(p)?`<img src="${esc(p)}" style="width:52px;height:52px;border-radius:7px;object-fit:cover;flex-shrink:0;cursor:zoom-in" onclick="openLbox(event,'${esc(p)}')">`:`<div style="width:52px;height:52px;border-radius:7px;background:#f0f2f8;display:flex;align-items:center;justify-content:center;font-size:.65rem;color:#aaa;flex-shrink:0">📷</div>`).join('')}</div>`:''}
       <div class="m-foot">
@@ -1136,60 +1245,118 @@ function toast(msg, type=''){
 }
 </script>
 
-<!-- ═══════════════ KIT LOOKUP MODAL ═══════════════ -->
-<div id="kitOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1100;align-items:flex-start;justify-content:center;padding-top:40px;overflow-y:auto" onclick="if(event.target===this)closeKitLookup()">
-  <div style="background:#1e1e2e;border-radius:14px;width:min(860px,97vw);padding:24px;position:relative;max-height:85vh;display:flex;flex-direction:column">
-    <button onclick="closeKitLookup()" style="position:absolute;top:12px;right:14px;background:none;border:none;color:#aaa;font-size:1.3rem;cursor:pointer">✕</button>
-    <h2 style="margin:0 0 16px;color:#fff;font-size:1.1rem">🔧 Kit Lookup — Which shipment did this kit go on?</h2>
-    <div style="display:flex;gap:8px;margin-bottom:16px">
-      <input id="kitSearchInput" type="text" placeholder="Type kit # or part # (e.g. 1003-20733, HSIU-1257, R-001360…)"
-        style="flex:1;padding:10px 14px;border-radius:8px;border:none;background:#2a2a3e;color:#fff;font-size:.9rem;outline:none"
-        oninput="kitSearch()" autocomplete="off">
-      <button onclick="document.getElementById('kitSearchInput').value='';kitSearch()" style="padding:8px 14px;border-radius:8px;border:none;background:#444;color:#fff;cursor:pointer">Clear</button>
-    </div>
-    <div id="kitResultCount" style="font-size:.8rem;color:#888;margin-bottom:8px"></div>
-    <div id="kitResults" style="flex:1;overflow-y:auto;min-height:200px">
-      <div style="color:#888;text-align:center;margin-top:40px">Start typing a kit number above</div>
-    </div>
-  </div>
-</div>
 
 
-<!-- ═══════════════ INVENTORY LOCATOR MODAL ═══════════════ -->
-<div id="invOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1100;align-items:flex-start;justify-content:center;padding-top:40px;overflow-y:auto" onclick="if(event.target===this)closeInvLookup()">
-  <div style="background:#1e1e2e;border-radius:14px;width:min(860px,97vw);padding:24px;position:relative;max-height:85vh;display:flex;flex-direction:column">
-    <button onclick="closeInvLookup()" style="position:absolute;top:12px;right:14px;background:none;border:none;color:#aaa;font-size:1.3rem;cursor:pointer">✕</button>
-    <h2 style="margin:0 0 4px;color:#fff;font-size:1.1rem">📋 Inventory Locator — Where is it &amp; is it available?</h2>
-    <div style="font-size:.72rem;color:#8b5cf6;font-weight:700;margin-bottom:14px">Inventory as of <span id="invAsof"></span> · snapshot, not live</div>
-    <div style="display:flex;gap:8px;margin-bottom:16px">
-      <input id="invSearchInput" type="text" placeholder="Type part # or description (e.g. R-001360, camera, 1003-20280…)"
-        style="flex:1;padding:10px 14px;border-radius:8px;border:none;background:#2a2a3e;color:#fff;font-size:.9rem;outline:none"
-        oninput="invSearch()" autocomplete="off">
-      <button onclick="document.getElementById('invSearchInput').value='';invSearch()" style="padding:8px 14px;border-radius:8px;border:none;background:#444;color:#fff;cursor:pointer">Clear</button>
-    </div>
-    <div id="invResultCount" style="font-size:.8rem;color:#888;margin-bottom:8px"></div>
-    <div id="invResults" style="flex:1;overflow-y:auto;min-height:200px">
-      <div style="color:#888;text-align:center;margin-top:40px">Start typing a part number above</div>
-    </div>
-  </div>
-</div>
+
+
 
 <script>
-function openInvLookup(){
-  document.getElementById('invAsof').textContent=INV_ASOF;
-  document.getElementById('invOverlay').style.display='flex';
-  setTimeout(()=>document.getElementById('invSearchInput').focus(),100);
+function openInvLookup(){ switchTab('inv'); }
+function closeInvLookup(){ switchTab('ship'); }
+function statClick(k){
+  if(k==='prog'){ switchTab('prog'); return; }
+  switchTab('ship');
+  if(k==='total'){ clearFilters(); return; }
+  if(k==='del') document.getElementById('fStatus').value='Yes';
+  if(k==='transit') document.getElementById('fStatus').value='No';
+  if(k==='month'){
+    const d=new Date(), y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0');
+    document.getElementById('fFrom').value=`${y}-${m}-01`;
+    document.getElementById('fTo').value=new Date(y,d.getMonth()+1,0).toISOString().slice(0,10);
+    document.getElementById('fStatus').value='';
+  }
+  render();
 }
-function closeInvLookup(){ document.getElementById('invOverlay').style.display='none'; }
+function copyTrack(t,e){
+  if(e) e.stopPropagation();
+  if(!t) return;
+  const fb=()=>{ const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy');}catch(_){} ta.remove(); toast('Tracking # copied','ok'); };
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(()=>toast('Tracking # copied','ok')).catch(fb); } else fb();
+}
+function stockCheck(k){
+  switchTab('inv');
+  const i=document.getElementById('invSearchInput');
+  i.value=k; invSearch();
+}
+function openDetail(id,ev){
+  if(ev && ev.target.closest('a,button,img,select,input,label')) return;
+  const s=ships.find(x=>x.id===id); if(!s) return;
+  const photos=(s.photos||[]).filter(p=>p&&p!=='No Picture available'&&p!=='No Picture Available');
+  const tUrl=trackUrl(s.carrier,s.tracking);
+  const hw=!!(cfg.apiUrl&&cfg.writeKey);
+  const F=(l,v)=>`<div><div class="dt-l">${l}</div><div class="dt-v">${v||'—'}</div></div>`;
+  document.getElementById('detailBody').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:16px">
+      <div>
+        <div style="font-size:1.15rem;font-weight:800">Shipment #${esc(s.index)||'—'}</div>
+        <div style="color:#888;font-size:.85rem;margin-top:2px">${esc(s.program)||'—'} · ${fmt(s.shipDate)}</div>
+      </div>
+      ${delivBadge(s.delivered)}
+    </div>
+    <div class="dt-grid">
+      ${F('Carrier',carrierBadge(s.carrier))}
+      ${F('Tracking #',s.tracking?`${tUrl?`<a href="${esc(tUrl)}" target="_blank" rel="noopener" class="track-link">${esc(s.tracking)}</a>`:`<span class="mono">${esc(s.tracking)}</span>`}<button class="copy-btn" data-t="${esc(s.tracking)}" onclick="copyTrack(this.dataset.t,event)" title="Copy">⧉</button>`:'—')}
+      ${F('S/O Number',esc(s.so))}
+      ${F('Shipping PO',esc(s.po))}
+      ${F('Kit #',esc(s.kitNo))}
+      ${F('Part #',esc(s.partNo))}
+      ${F('Cost',fmtCost(s.cost))}
+      ${F('Weight',esc(s.weight))}
+      ${F('Packing Slip',s.packingSlip?(isUrl(s.packingSlip)?`<a href="${esc(s.packingSlip)}" target="_blank" referrerpolicy="no-referrer" class="link-btn">📄 Open slip</a>`:esc(s.packingSlip)):'—')}
+      ${F('Created',s.createdAt?esc(String(s.createdAt).slice(0,10)):'—')}
+    </div>
+    ${s.notes?`<div style="margin-top:14px"><div class="dt-l">Notes</div><div class="dt-v" style="white-space:pre-wrap">${esc(s.notes)}</div></div>`:''}
+    ${photos.length?`<div class="dt-l" style="margin:14px 0 6px">Photos (${photos.length})</div><div style="display:flex;gap:8px;flex-wrap:wrap">${photos.map(p=>isUrl(p)?`<img src="${esc(p)}" style="width:74px;height:74px;object-fit:cover;border-radius:8px;cursor:zoom-in" onclick="openLbox(event,'${esc(p)}')">`:'').join('')}</div>`:''}
+    <div class="modal-actions">
+      ${hw?`<button class="btn btn-secondary" onclick="closeDetail();openEdit('${s.id}')">✏️ Edit</button>`:''}
+      <button class="btn btn-primary" onclick="closeDetail()">Close</button>
+    </div>`;
+  document.getElementById('detailOverlay').classList.add('open');
+}
+function closeDetail(){ document.getElementById('detailOverlay').classList.remove('open'); }
+function renderPrograms(){
+  const g=document.getElementById('progGrid');
+  const map={};
+  ships.forEach(s=>{
+    const p=s.program||'(No program)';
+    const m=(map[p]=map[p]||{n:0,t:0,d:0,c:0,last:''});
+    m.n++; if(s.delivered==='No')m.t++; if(s.delivered==='Yes')m.d++;
+    m.c+=parseFloat(s.cost)||0;
+    if(s.shipDate&&s.shipDate>m.last)m.last=s.shipDate;
+  });
+  const keys=Object.keys(map).sort((a,b)=>map[b].n-map[a].n);
+  if(!keys.length){ g.innerHTML='<div style="color:#aaa;text-align:center;padding:40px;background:#fff;border-radius:12px">No shipment data loaded yet</div>'; return; }
+  g.innerHTML=keys.map(p=>{const m=map[p];return `<div class="prog-card" data-p="${esc(p)}" onclick="progGo(this.dataset.p)">
+    <div style="font-weight:800;font-size:.95rem;margin-bottom:8px">${esc(p)}</div>
+    <div style="font-size:1.65rem;font-weight:800;color:#4f6ef7;line-height:1">${m.n}</div>
+    <div style="font-size:.66rem;color:#999;text-transform:uppercase;letter-spacing:.5px;margin-bottom:9px">shipments</div>
+    <div style="display:flex;gap:10px;font-size:.75rem;color:#666;flex-wrap:wrap">
+      <span>🚚 ${m.t} in transit</span><span>✅ ${m.d} delivered</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:9px;padding-top:9px;border-top:1px solid #f0f0f0;font-size:.72rem;color:#999">
+      <span>Last ship: ${m.last?fmt(m.last):'—'}</span><span style="font-weight:700">${m.c>0?'$'+m.c.toLocaleString('en-US',{maximumFractionDigits:0}):''}</span>
+    </div></div>`;}).join('');
+}
+function progGo(p){
+  switchTab('ship');
+  const sel=document.getElementById('fProgram');
+  sel.value=(p==='(No program)')?'':p;
+  render();
+}
 function fq(n){ return (n%1===0)? n.toLocaleString() : n.toLocaleString(undefined,{maximumFractionDigits:2}); }
 function invSearch(){
   const q=(document.getElementById('invSearchInput').value||'').trim().toLowerCase();
   const out=document.getElementById('invResults'), cnt=document.getElementById('invResultCount');
-  if(q.length<2){
-    out.innerHTML='<div style="color:#888;text-align:center;margin-top:40px">Type at least 2 characters to search</div>';
+  const whF=(document.getElementById('invWh')||{}).value||'';
+  const avF=!!((document.getElementById('invAvail')||{}).checked);
+  if(q.length<2 && !whF && !avF){
+    out.innerHTML='<div style="color:#888;text-align:center;margin-top:40px">Type at least 2 characters to search — or pick a warehouse to browse</div>';
     cnt.textContent=''; return;
   }
-  const hits=INV_DATA.filter(r=>r[0].toLowerCase().includes(q)||r[1].toLowerCase().includes(q));
+  let hits=INV_DATA;
+  if(q.length>=2) hits=hits.filter(r=>r[0].toLowerCase().includes(q)||r[1].toLowerCase().includes(q));
+  if(whF) hits=hits.filter(r=>r[2]===whF);
+  if(avF) hits=hits.filter(r=>r[7]>0);
   if(!hits.length){
     cnt.textContent='No items found';
     out.innerHTML=`<div style="color:#888;text-align:center;margin-top:40px">No inventory found for "${esc(q)}"</div>`;
