@@ -805,6 +805,10 @@ function delivBadge(d){
 }
 
 // ── Stats ─────────────────────────────────────────────────────────────────────
+// ═══ DEMO MODE: set a number to override the Freight Cost stat (e.g. 50000).
+// ═══ Set to null to show the real total again.
+const DEMO_COST_OVERRIDE = 111111111111;
+
 function updateStats(){
   const ym = new Date().toISOString().slice(0,7);
   document.getElementById('stTotal').textContent = ships.length;
@@ -812,7 +816,9 @@ function updateStats(){
   document.getElementById('stTransit').textContent = ships.filter(s=>s.delivered==='No').length;
   document.getElementById('stMonth').textContent = ships.filter(s=>s.shipDate&&s.shipDate.startsWith(ym)).length;
   document.getElementById('stPrograms').textContent = new Set(ships.map(s=>s.program).filter(Boolean)).size;
-  const cost = ships.reduce((a,s)=>a+(parseFloat(s.cost)||0),0);
+  const cost = (DEMO_COST_OVERRIDE!==null && DEMO_COST_OVERRIDE!==undefined)
+    ? DEMO_COST_OVERRIDE
+    : ships.reduce((a,s)=>a+(parseFloat(s.cost)||0),0);
   document.getElementById('stCost').textContent = cost>0?'$'+cost.toLocaleString('en-US',{maximumFractionDigits:0}):'$0';
 }
 
