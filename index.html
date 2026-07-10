@@ -212,7 +212,7 @@ tr:hover td{background:#fafbff}
   .mob-fab{display:flex}
   .hdr-btn.desk-only{display:none}
   .overlay{padding:0;align-items:flex-end}
-  .modal{border-radius:20px 20px 0 0;max-width:100%;padding:20px 16px 32px;margin:0}
+  .modal{border-radius:20px 20px 0 0;max-width:100%;padding:20px 16px 32px;margin:0;max-height:calc(100vh - 16px);max-height:calc(100dvh - 16px);overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding-bottom:calc(32px + env(safe-area-inset-bottom))}
   .form-grid{grid-template-columns:1fr}
   .fg.full{grid-column:1}
   .modal-title{font-size:.97rem}
